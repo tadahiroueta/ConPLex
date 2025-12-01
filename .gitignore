@@ -3,7 +3,7 @@
 
 # Project Specific
 wandb/
-models/
+# models/
 best_models/
 **.h5
 
