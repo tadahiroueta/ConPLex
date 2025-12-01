@@ -56,6 +56,7 @@ conplex-dti download --to . --models ConPLex_v1_BindingDB
 ### Run benchmark training
 
 ```bash
+# TODO: run this line with your custom config file (i.e. experimental_config.yaml) and save the logs
 conplex-dti train --run-id TestRun --config config/default_config.yaml
 ```
 

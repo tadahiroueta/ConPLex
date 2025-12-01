@@ -743,3 +743,6 @@ class AffinityConcatLinear(nn.Module):
     def forward(self, mol_emb, prot_emb):
         cat_emb = torch.cat([mol_emb, prot_emb], axis=1)
         return self.fc(cat_emb).squeeze()
+
+
+# TODO: Create a new NN architecture with same inputs and outputs as SimpleCoembedding
