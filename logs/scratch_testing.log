@@ -1,0 +1,207 @@
+2025-12-01 12:53:54,571 [INFO] Using CUDA device cpu
+2025-12-01 12:53:54,571 [DEBUG] Setting random state 0
+2025-12-01 12:53:54,571 [INFO] Preparing DataModule
+2025-12-01 12:56:33,383 [INFO] Writing Morgan features to C:\Users\tadah\Documents\irvine\COMPSCI-184A\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-01 12:56:33,690 [INFO] Writing ProtBert features to C:\Users\tadah\Documents\irvine\COMPSCI-184A\ConPLex\datasets\DAVIS\ProtBert_features.h5
+2025-12-01 14:24:39,993 [INFO] Preloading Morgan features from C:\Users\tadah\Documents\irvine\COMPSCI-184A\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-01 14:24:40,045 [INFO] Preloading ProtBert features from C:\Users\tadah\Documents\irvine\COMPSCI-184A\ConPLex\datasets\DAVIS\ProtBert_features.h5
+2025-12-01 14:24:40,209 [INFO] Getting DataLoaders
+2025-12-01 14:24:40,245 [INFO] Initializing model
+2025-12-01 14:24:40,341 [INFO] SimpleCoembedding(
+  (drug_projector): Sequential(
+    (0): Linear(in_features=2048, out_features=1024, bias=True)
+    (1): ReLU()
+  )
+  (target_projector): Sequential(
+    (0): Linear(in_features=1024, out_features=1024, bias=True)
+    (1): ReLU()
+  )
+  (activator): Cosine()
+)
+2025-12-01 14:24:40,341 [INFO] Initializing optimizers
+2025-12-01 14:24:40,356 [INFO] Initializing metrics
+2025-12-01 14:24:40,391 [INFO] Config:
+2025-12-01 14:24:40,400 [INFO] {
+    "wandb_proj": "NoSigmoidTest",
+    "wandb_save": false,
+    "log_file": "./logs/scratch_testing.log",
+    "model_save_dir": "./best_models",
+    "data_cache_dir": "./datasets",
+    "device": 0,
+    "replicate": 0,
+    "verbosity": 3,
+    "task": "davis",
+    "contrastive_split": "within",
+    "drug_featurizer": "MorganFeaturizer",
+    "target_featurizer": "ProtBertFeaturizer",
+    "model_architecture": "SimpleCoembeddingNoSigmoid",
+    "latent_dimension": 1024,
+    "latent_distance": "Cosine",
+    "epochs": 15,
+    "batch_size": 32,
+    "contrastive_batch_size": 256,
+    "shuffle": true,
+    "num_workers": 10,
+    "every_n_val": 1,
+    "lr": 0.0001,
+    "lr_t0": 10,
+    "contrastive": false,
+    "clr": 1e-05,
+    "clr_t0": 10,
+    "margin_fn": "tanh_decay",
+    "margin_max": 0.25,
+    "margin_t0": 10,
+    "cmd": "train",
+    "run_id": "ControlRun",
+    "config": "config/quick_config.yaml",
+    "sigmoid_cosine": false,
+    "classify": true,
+    "watch_metric": "val/aupr",
+    "latent_activation": "ReLU",
+    "drug_shape": 2048,
+    "target_shape": 1024
+}
+2025-12-01 14:24:40,402 [INFO] Beginning Training
+2025-12-01 14:26:39,889 [INFO] Training at Epoch 1 with loss 0.490997
+2025-12-01 14:26:39,889 [INFO] Updating learning rate to 0.000098
+2025-12-01 14:28:14,465 [DEBUG] Validation AUPR 0.293435 > previous max 0.000000
+2025-12-01 14:28:14,496 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch00.pt
+2025-12-01 14:28:14,497 [INFO] Validation at Epoch 1
+2025-12-01 14:28:14,498 [INFO] val/aupr: 0.29343515634536743
+2025-12-01 14:28:14,498 [INFO] val/auroc: 0.8306505084037781
+2025-12-01 14:28:14,499 [INFO] epoch: 0
+2025-12-01 14:28:14,499 [INFO] Charts/epoch_time: 119.4862802028656
+2025-12-01 14:29:30,838 [INFO] Training at Epoch 2 with loss 0.547475
+2025-12-01 14:29:30,838 [INFO] Updating learning rate to 0.000090
+2025-12-01 14:30:43,519 [DEBUG] Validation AUPR 0.305566 > previous max 0.293435
+2025-12-01 14:30:43,540 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch01.pt
+2025-12-01 14:30:43,540 [INFO] Validation at Epoch 2
+2025-12-01 14:30:43,540 [INFO] val/aupr: 0.30556556582450867
+2025-12-01 14:30:43,540 [INFO] val/auroc: 0.8427145481109619
+2025-12-01 14:30:43,540 [INFO] epoch: 1
+2025-12-01 14:30:43,540 [INFO] Charts/epoch_time: 76.33840751647949
+2025-12-01 14:31:59,637 [INFO] Training at Epoch 3 with loss 0.317614
+2025-12-01 14:31:59,637 [INFO] Updating learning rate to 0.000079
+2025-12-01 14:33:18,102 [DEBUG] Validation AUPR 0.327114 > previous max 0.305566
+2025-12-01 14:33:18,118 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch02.pt
+2025-12-01 14:33:18,118 [INFO] Validation at Epoch 3
+2025-12-01 14:33:18,118 [INFO] val/aupr: 0.3271137475967407
+2025-12-01 14:33:18,118 [INFO] val/auroc: 0.8546644449234009
+2025-12-01 14:33:18,118 [INFO] epoch: 2
+2025-12-01 14:33:18,118 [INFO] Charts/epoch_time: 76.09677720069885
+2025-12-01 14:34:34,416 [INFO] Training at Epoch 4 with loss 0.609863
+2025-12-01 14:34:34,416 [INFO] Updating learning rate to 0.000065
+2025-12-01 14:35:51,473 [DEBUG] Validation AUPR 0.360175 > previous max 0.327114
+2025-12-01 14:35:51,488 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch03.pt
+2025-12-01 14:35:51,488 [INFO] Validation at Epoch 4
+2025-12-01 14:35:51,488 [INFO] val/aupr: 0.36017537117004395
+2025-12-01 14:35:51,488 [INFO] val/auroc: 0.8670118451118469
+2025-12-01 14:35:51,488 [INFO] epoch: 3
+2025-12-01 14:35:51,488 [INFO] Charts/epoch_time: 76.28295660018921
+2025-12-01 14:37:08,539 [INFO] Training at Epoch 5 with loss 0.717638
+2025-12-01 14:37:08,539 [INFO] Updating learning rate to 0.000050
+2025-12-01 14:38:20,493 [DEBUG] Validation AUPR 0.390537 > previous max 0.360175
+2025-12-01 14:38:20,518 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch04.pt
+2025-12-01 14:38:20,519 [INFO] Validation at Epoch 5
+2025-12-01 14:38:20,520 [INFO] val/aupr: 0.3905365765094757
+2025-12-01 14:38:20,520 [INFO] val/auroc: 0.8771400451660156
+2025-12-01 14:38:20,521 [INFO] epoch: 4
+2025-12-01 14:38:20,521 [INFO] Charts/epoch_time: 77.0391116142273
+2025-12-01 14:39:33,388 [INFO] Training at Epoch 6 with loss 0.418530
+2025-12-01 14:39:33,388 [INFO] Updating learning rate to 0.000035
+2025-12-01 14:40:59,794 [DEBUG] Validation AUPR 0.408578 > previous max 0.390537
+2025-12-01 14:40:59,820 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch05.pt
+2025-12-01 14:40:59,820 [INFO] Validation at Epoch 6
+2025-12-01 14:40:59,821 [INFO] val/aupr: 0.4085776209831238
+2025-12-01 14:40:59,821 [INFO] val/auroc: 0.8813521265983582
+2025-12-01 14:40:59,822 [INFO] epoch: 5
+2025-12-01 14:40:59,822 [INFO] Charts/epoch_time: 72.86524248123169
+2025-12-01 14:42:33,297 [INFO] Training at Epoch 7 with loss 0.251097
+2025-12-01 14:42:33,297 [INFO] Updating learning rate to 0.000021
+2025-12-01 14:44:01,433 [DEBUG] Validation AUPR 0.419441 > previous max 0.408578
+2025-12-01 14:44:01,471 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch06.pt
+2025-12-01 14:44:01,471 [INFO] Validation at Epoch 7
+2025-12-01 14:44:01,471 [INFO] val/aupr: 0.4194413423538208
+2025-12-01 14:44:01,471 [INFO] val/auroc: 0.8847933411598206
+2025-12-01 14:44:01,471 [INFO] epoch: 6
+2025-12-01 14:44:01,471 [INFO] Charts/epoch_time: 93.47345852851868
+2025-12-01 14:45:31,041 [INFO] Training at Epoch 8 with loss 0.520556
+2025-12-01 14:45:31,041 [INFO] Updating learning rate to 0.000010
+2025-12-01 14:46:59,207 [DEBUG] Validation AUPR 0.431314 > previous max 0.419441
+2025-12-01 14:46:59,234 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch07.pt
+2025-12-01 14:46:59,234 [INFO] Validation at Epoch 8
+2025-12-01 14:46:59,234 [INFO] val/aupr: 0.431314080953598
+2025-12-01 14:46:59,234 [INFO] val/auroc: 0.887493371963501
+2025-12-01 14:46:59,234 [INFO] epoch: 7
+2025-12-01 14:46:59,234 [INFO] Charts/epoch_time: 89.5715069770813
+2025-12-01 14:48:33,671 [INFO] Training at Epoch 9 with loss 0.311796
+2025-12-01 14:48:33,671 [INFO] Updating learning rate to 0.000002
+2025-12-01 14:50:04,436 [DEBUG] Validation AUPR 0.434753 > previous max 0.431314
+2025-12-01 14:50:04,454 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch08.pt
+2025-12-01 14:50:04,466 [INFO] Validation at Epoch 9
+2025-12-01 14:50:04,466 [INFO] val/aupr: 0.43475261330604553
+2025-12-01 14:50:04,467 [INFO] val/auroc: 0.8884871006011963
+2025-12-01 14:50:04,468 [INFO] epoch: 8
+2025-12-01 14:50:04,468 [INFO] Charts/epoch_time: 94.43658018112183
+2025-12-01 14:51:40,483 [INFO] Training at Epoch 10 with loss 0.455861
+2025-12-01 14:51:40,483 [INFO] Updating learning rate to 0.000100
+2025-12-01 14:52:35,921 [DEBUG] Validation AUPR 0.435418 > previous max 0.434753
+2025-12-01 14:52:35,954 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch09.pt
+2025-12-01 14:52:35,954 [INFO] Validation at Epoch 10
+2025-12-01 14:52:35,955 [INFO] val/aupr: 0.43541833758354187
+2025-12-01 14:52:35,955 [INFO] val/auroc: 0.8886561989784241
+2025-12-01 14:52:35,955 [INFO] epoch: 9
+2025-12-01 14:52:35,955 [INFO] Charts/epoch_time: 96.01635646820068
+2025-12-01 14:53:14,406 [INFO] Training at Epoch 11 with loss 0.507279
+2025-12-01 14:53:14,406 [INFO] Updating learning rate to 0.000098
+2025-12-01 14:53:50,594 [DEBUG] Validation AUPR 0.453544 > previous max 0.435418
+2025-12-01 14:53:50,614 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch10.pt
+2025-12-01 14:53:50,614 [INFO] Validation at Epoch 11
+2025-12-01 14:53:50,614 [INFO] val/aupr: 0.45354384183883667
+2025-12-01 14:53:50,614 [INFO] val/auroc: 0.8941376209259033
+2025-12-01 14:53:50,614 [INFO] epoch: 10
+2025-12-01 14:53:50,614 [INFO] Charts/epoch_time: 38.44992470741272
+2025-12-01 14:54:28,087 [INFO] Training at Epoch 12 with loss 0.232803
+2025-12-01 14:54:28,087 [INFO] Updating learning rate to 0.000090
+2025-12-01 14:55:05,159 [DEBUG] Validation AUPR 0.473752 > previous max 0.453544
+2025-12-01 14:55:05,179 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch11.pt
+2025-12-01 14:55:05,179 [INFO] Validation at Epoch 12
+2025-12-01 14:55:05,179 [INFO] val/aupr: 0.4737522304058075
+2025-12-01 14:55:05,179 [INFO] val/auroc: 0.9017074108123779
+2025-12-01 14:55:05,181 [INFO] epoch: 11
+2025-12-01 14:55:05,181 [INFO] Charts/epoch_time: 37.4730920791626
+2025-12-01 14:55:43,862 [INFO] Training at Epoch 13 with loss 0.448349
+2025-12-01 14:55:43,862 [INFO] Updating learning rate to 0.000079
+2025-12-01 14:56:23,068 [DEBUG] Validation AUPR 0.487227 > previous max 0.473752
+2025-12-01 14:56:23,095 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch12.pt
+2025-12-01 14:56:23,095 [INFO] Validation at Epoch 13
+2025-12-01 14:56:23,096 [INFO] val/aupr: 0.4872267246246338
+2025-12-01 14:56:23,096 [INFO] val/auroc: 0.9049729704856873
+2025-12-01 14:56:23,097 [INFO] epoch: 12
+2025-12-01 14:56:23,098 [INFO] Charts/epoch_time: 38.6816463470459
+2025-12-01 14:57:09,436 [INFO] Training at Epoch 14 with loss 0.301721
+2025-12-01 14:57:09,436 [INFO] Updating learning rate to 0.000065
+2025-12-01 14:57:53,886 [DEBUG] Validation AUPR 0.500753 > previous max 0.487227
+2025-12-01 14:57:53,915 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch13.pt
+2025-12-01 14:57:53,915 [INFO] Validation at Epoch 14
+2025-12-01 14:57:53,915 [INFO] val/aupr: 0.5007530450820923
+2025-12-01 14:57:53,915 [INFO] val/auroc: 0.906242311000824
+2025-12-01 14:57:53,923 [INFO] epoch: 13
+2025-12-01 14:57:53,924 [INFO] Charts/epoch_time: 46.337663650512695
+2025-12-01 14:58:40,428 [INFO] Training at Epoch 15 with loss 0.387053
+2025-12-01 14:58:40,433 [INFO] Updating learning rate to 0.000050
+2025-12-01 14:59:24,834 [DEBUG] Validation AUPR 0.506098 > previous max 0.500753
+2025-12-01 14:59:24,868 [INFO] Saving checkpoint model to best_models\ControlRun\ControlRun_best_model_epoch14.pt
+2025-12-01 14:59:24,868 [INFO] Validation at Epoch 15
+2025-12-01 14:59:24,883 [INFO] val/aupr: 0.5060978531837463
+2025-12-01 14:59:24,883 [INFO] val/auroc: 0.9094342589378357
+2025-12-01 14:59:24,884 [INFO] epoch: 14
+2025-12-01 14:59:24,884 [INFO] Charts/epoch_time: 46.50772500038147
+2025-12-01 14:59:24,884 [INFO] Beginning testing
+2025-12-01 15:37:34,468 [INFO] Final Testing
+2025-12-01 15:37:34,468 [INFO] test/aupr: 0.5168959498405457
+2025-12-01 15:37:34,468 [INFO] test/auroc: 0.9330532550811768
+2025-12-01 15:37:34,468 [INFO] epoch: 15
+2025-12-01 15:37:34,468 [INFO] test/eval_time: 2289.5839166641235
+2025-12-01 15:37:34,468 [INFO] Charts/wall_clock_time: 2084.481796979904
+2025-12-01 15:37:34,501 [INFO] Saving final model to best_models\ControlRun\ControlRun_best_model.pt
