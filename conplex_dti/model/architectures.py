@@ -59,17 +59,17 @@ class LogisticActivation(nn.Module):
     """
     Implementation of Generalized Sigmoid
     Applies the element-wise function:
-    :math:`\\sigma(x) = \\frac{1}{1 + \\exp(-k(x-x_0))}`
+    :math:`\sigma(x) = \frac{1}{1 + \exp(-k(x-x_0))}`
     :param x0: The value of the sigmoid midpoint
     :type x0: float
-    :param k: The slope of the sigmoid - trainable -  :math:`k \\geq 0`
+    :param k: The slope of the sigmoid - trainable -  :math:`k \geq 0`
     :type k: float
     :param train: Whether :math:`k` is a trainable parameter
     :type train: bool
     """
 
     def __init__(self, x0=0, k=1, train=False):
-        super(LogisticActivation, self).__init__()
+        super().__init__()
         self.x0 = x0
         self.k = nn.Parameter(torch.FloatTensor([float(k)]), requires_grad=False)
         self.k.requiresGrad = train
@@ -77,9 +77,9 @@ class LogisticActivation(nn.Module):
     def forward(self, x):
         """
         Applies the function to the input elementwise
-        :param x: :math:`(N \\times *)` where :math:`*` means, any number of additional dimensions
+        :param x: :math:`(N \times *)` where :math:`*` means, any number of additional dimensions
         :type x: torch.Tensor
-        :return: :math:`(N \\times *)`, same shape as the input
+        :return: :math:`(N \times *)`, same shape as the input
         :rtype: torch.Tensor
         """
         o = torch.clamp(
@@ -155,7 +155,84 @@ class SimpleCoembedding(nn.Module):
         return distance.squeeze()
 
 
-SimpleCoembeddingNoSigmoid = SimpleCoembedding
+class ResidualBlock(nn.Module):
+    def __init__(self, d_model, dropout=0.1):
+        super().__init__()
+        self.fc1 = nn.Linear(d_model, d_model)
+        self.fc2 = nn.Linear(d_model, d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = nn.ReLU()
+        self.alpha = nn.Parameter(torch.tensor(0.0)) # Learnable alpha initialized to 0
+
+    def forward(self, x):
+        residual = x
+        out = self.activation(self.fc1(x))
+        out = self.dropout(out)
+        out = self.fc2(out)
+        out = self.dropout(out)
+        return residual + self.alpha * out
+
+
+class ResidualCoembedding(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        latent_activation="ReLU",
+        latent_distance="Cosine",
+        classify=True,
+        num_blocks=3,
+        dropout=0.1,
+    ):
+        super().__init__()
+        self.drug_shape = drug_shape
+        self.target_shape = target_shape
+        self.latent_dimension = latent_dimension
+        self.do_classify = classify
+        self.latent_activation = ACTIVATIONS[latent_activation]
+        self.num_blocks = num_blocks
+
+        self.drug_projector = nn.Sequential(
+            nn.Linear(self.drug_shape, latent_dimension),
+            self.latent_activation(),
+            *[ResidualBlock(latent_dimension, dropout) for _ in range(num_blocks)]
+        )
+        nn.init.xavier_normal_(self.drug_projector[0].weight)
+
+        self.target_projector = nn.Sequential(
+            nn.Linear(self.target_shape, latent_dimension),
+            self.latent_activation(),
+            *[ResidualBlock(latent_dimension, dropout) for _ in range(num_blocks)]
+        )
+        nn.init.xavier_normal_(self.target_projector[0].weight)
+
+        if self.do_classify:
+            self.distance_metric = latent_distance
+            self.activator = DISTANCE_METRICS[self.distance_metric]()
+
+    def forward(self, drug, target):
+        if self.do_classify:
+            return self.classify(drug, target)
+        else:
+            return self.regress(drug, target)
+
+    def regress(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        inner_prod = torch.bmm(
+            drug_projection.view(-1, 1, self.latent_dimension),
+            target_projection.view(-1, self.latent_dimension, 1),
+        ).squeeze()
+        return inner_prod.squeeze()
+
+    def classify(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        distance = self.activator(drug_projection, target_projection)
+        return distance.squeeze()
 
 
 class SimpleCoembeddingSigmoid(nn.Module):
@@ -743,6 +820,96 @@ class AffinityConcatLinear(nn.Module):
     def forward(self, mol_emb, prot_emb):
         cat_emb = torch.cat([mol_emb, prot_emb], axis=1)
         return self.fc(cat_emb).squeeze()
+SimpleCoembeddingNoSigmoid = SimpleCoembedding
 
+class CrossAttentionCoembedding(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        latent_activation="ReLU",
+        latent_distance="Cosine",
+        classify=True,
+        num_heads=4,
+        dropout=0.1,
+    ):
+        super().__init__()
+        self.drug_shape = drug_shape
+        self.target_shape = target_shape
+        self.latent_dimension = latent_dimension
+        self.do_classify = classify
+        self.num_heads = num_heads
+        self.dropout = dropout
 
-# TODO: Create a new NN architecture with same inputs and outputs as SimpleCoembedding
+        # Project inputs to latent dimension
+        self.drug_projector = nn.Sequential(
+            nn.Linear(self.drug_shape, latent_dimension),
+            ACTIVATIONS[latent_activation](),
+            nn.Dropout(dropout)
+        )
+        self.target_projector = nn.Sequential(
+            nn.Linear(self.target_shape, latent_dimension),
+            ACTIVATIONS[latent_activation](),
+            nn.Dropout(dropout)
+        )
+
+        # Cross-Attention Layer
+        # Embeddings will be (Batch, Latent), we need (Seq, Batch, Latent) for MultiheadAttention
+        # Since we have single embeddings per drug/target, Seq length is 1.
+        self.cross_attention = nn.MultiheadAttention(
+            embed_dim=latent_dimension,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True
+        )
+
+        # Final prediction head
+        # We'll concatenate the attended drug and target embeddings
+        self.mlp = nn.Sequential(
+            nn.Linear(2 * latent_dimension, latent_dimension),
+            ACTIVATIONS[latent_activation](),
+            nn.Dropout(dropout),
+            nn.Linear(latent_dimension, 1)
+        )
+
+        if self.do_classify:
+            self.distance_metric = latent_distance
+            self.activator = DISTANCE_METRICS[self.distance_metric]()
+
+    def forward(self, drug, target):
+        # Project to latent space
+        drug_emb = self.drug_projector(drug)      # (B, L)
+        target_emb = self.target_projector(target) # (B, L)
+
+        # Reshape for MultiheadAttention: (B, S, E) where S=1
+        drug_seq = drug_emb.unsqueeze(1)       # (B, 1, L)
+        target_seq = target_emb.unsqueeze(1)   # (B, 1, L)
+
+        # Cross Attention: Drug attends to Target
+        # query=drug, key=target, value=target
+        attn_output, _ = self.cross_attention(
+            query=drug_seq,
+            key=target_seq,
+            value=target_seq
+        )
+        
+        # attn_output is (B, 1, L)
+        drug_attended = attn_output.squeeze(1) # (B, L)
+
+        # Concatenate
+        combined = torch.cat([drug_attended, target_emb], dim=1) # (B, 2L)
+
+        # Predict
+        prediction = self.mlp(combined) # (B, 1)
+
+        if self.do_classify:
+            return torch.sigmoid(prediction).squeeze()
+        else:
+            return prediction.squeeze()
+
+    def regress(self, drug, target):
+        return self.forward(drug, target)
+
+    def classify(self, drug, target):
+        return self.forward(drug, target)

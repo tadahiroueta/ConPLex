@@ -91,14 +91,20 @@ def main(args):
         logg.error(f"Could not find data file: {args.data_file}")
         return
 
-    # Set CUDA device
+    # Set Device
     if args.device == "cpu":
         device = torch.device("cpu")
-    else:
+        logg.info(f"Using CPU device {device}")
+    elif torch.cuda.is_available():
         device_no = args.device
-        use_cuda = torch.cuda.is_available()
-        device = torch.device(f"cuda:{device_no}" if use_cuda else "cpu")
-    logg.info(f"Using CUDA device {device}")
+        device = torch.device(f"cuda:{device_no}")
+        logg.info(f"Using CUDA device {device}")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+        logg.info(f"Using MPS device {device}")
+    else:
+        device = torch.device("cpu")
+        logg.info(f"Using CPU device {device}")
 
     # Loading model
     logg.info(f"Loading model from {args.model_path}")
