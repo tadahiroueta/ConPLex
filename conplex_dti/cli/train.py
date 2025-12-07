@@ -23,8 +23,14 @@ from ..dataset import (
     DUDEDataModule,
     EnzPredDataModule,
     TDCDataModule,
+    DTIDataModule,
+    DUDEDataModule,
+    EnzPredDataModule,
+    TDCDataModule,
     get_task_dir,
+    ContrastiveDataset,
 )
+from ..dataset.datamodules import make_contrastive
 from ..featurizer import get_featurizer
 from ..model import architectures as model_types
 from ..model.margin import MarginScheduledLossFunction
@@ -129,6 +135,10 @@ def add_args(parser: ArgumentParser):
     model_group.add_argument(
         "--latent-distance", help="Latent distance", dest="latent_distance"
     )
+    model_group.add_argument("--num-layers", type=int, help="Number of layers for Deep/MLP models", dest="num_layers")
+    model_group.add_argument("--num-heads", type=int, help="Number of heads for Attention models", dest="num_heads")
+    model_group.add_argument("--dropout", type=float, help="Dropout rate", dest="dropout")
+    model_group.add_argument("--num-blocks", type=int, help="Number of residual blocks", dest="num_blocks")
     # Training
     train_group = parser.add_argument_group("Training")
 
@@ -152,7 +162,7 @@ def add_args(parser: ArgumentParser):
         "--lr-t0", type=int, help="number of epochs to reset learning rate"
     )
     train_group.add_argument(
-        "--contrastive", type=bool, help="run contrastive training"
+        "--contrastive", type=str, help="run contrastive training (True/False)"
     )
     train_group.add_argument(
         "--clr", type=float, help="initial learning rate", dest="clr"
@@ -173,6 +183,8 @@ def add_args(parser: ArgumentParser):
         "--use-sigmoid-cosine", action="store_true", dest="sigmoid_cosine", 
         help="Use sigmoid cosine distance instead of just cosine distance for contrastive loss"
     )
+    train_group.add_argument("--scheduler", type=str, default="cosine", choices=["cosine", "plateau"], help="LR scheduler")
+    train_group.add_argument("--patience", type=int, default=10, help="Early stopping patience")
 
     return parser
 
@@ -249,6 +261,9 @@ def main(args):
     arg_overrides = {k: v for k, v in vars(args).items() if v is not None}
     config.update(arg_overrides)
 
+    if isinstance(config.contrastive, str):
+        config.contrastive = config.contrastive.lower() == "true"
+
     save_dir = f'{config.get("model_save_dir", ".")}/{config.run_id}'
     os.makedirs(save_dir, exist_ok=True)
 
@@ -264,11 +279,17 @@ def main(args):
         use_stdout=True,
     )
 
-    # Set CUDA device
+    # Set Device
     device_no = config.device
-    use_cuda = torch.cuda.is_available()
-    device = torch.device(f"cuda:{device_no}" if use_cuda else "cpu")
-    logg.info(f"Using CUDA device {device}")
+    if torch.cuda.is_available():
+        device = torch.device(f"cuda:{device_no}")
+        logg.info(f"Using CUDA device {device}")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+        logg.info(f"Using MPS device {device}")
+    else:
+        device = torch.device("cpu")
+        logg.info(f"Using CPU device {device}")
 
     # Set random state
     logg.debug(f"Setting random state {config.replicate}")
@@ -332,45 +353,88 @@ def main(args):
     testing_generator = datamodule.test_dataloader()
 
     if config.contrastive:
-        logg.info("Loading contrastive data (DUDE)")
-        dude_drug_featurizer = get_featurizer(
-            config.drug_featurizer,
-            save_dir=get_task_dir("DUDe", database_root=config.data_cache_dir),
-        )
+        if config.task == "dude":
+            logg.info("Loading contrastive data (DUDE)")
+            dude_drug_featurizer = get_featurizer(
+                config.drug_featurizer,
+                save_dir=get_task_dir("DUDe", database_root=config.data_cache_dir),
+            )
 
-        dude_target_featurizer = get_featurizer(
-            config.target_featurizer,
-            save_dir=get_task_dir("DUDe", database_root=config.data_cache_dir),
-        )
+            dude_target_featurizer = get_featurizer(
+                config.target_featurizer,
+                save_dir=get_task_dir("DUDe", database_root=config.data_cache_dir),
+            )
 
-        contrastive_datamodule = DUDEDataModule(
-            get_task_dir("DUDe", database_root=config.data_cache_dir),
-            config.contrastive_split,
-            dude_drug_featurizer,
-            dude_target_featurizer,
-            device=device,
-            batch_size=config.contrastive_batch_size,
-            shuffle=config.shuffle,
-            num_workers=config.num_workers,
-        )
+            contrastive_datamodule = DUDEDataModule(
+                get_task_dir("DUDe", database_root=config.data_cache_dir),
+                config.contrastive_split,
+                dude_drug_featurizer,
+                dude_target_featurizer,
+                device=device,
+                batch_size=config.contrastive_batch_size,
+                shuffle=config.shuffle,
+                num_workers=config.num_workers,
+            )
 
-        contrastive_datamodule.prepare_data()
-        contrastive_datamodule.setup(stage="fit")
-        contrastive_generator = contrastive_datamodule.train_dataloader()
+            contrastive_datamodule.prepare_data()
+            contrastive_datamodule.setup(stage="fit")
+            contrastive_generator = contrastive_datamodule.train_dataloader()
+        else:
+            logg.info(f"Loading contrastive data from {config.task}")
+            # Use the existing datamodule's training data
+            train_contrastive = make_contrastive(
+                datamodule.df_train,
+                datamodule._drug_column,
+                datamodule._target_column,
+                datamodule._label_column,
+                n_neg_per=50, # Default from DUDEDataModule
+            )
+            
+            contrastive_ds = ContrastiveDataset(
+                train_contrastive["Anchor"],
+                train_contrastive["Positive"],
+                train_contrastive["Negative"],
+                drug_featurizer,
+                target_featurizer,
+            )
+            
+            contrastive_generator = data.DataLoader(
+                contrastive_ds,
+                batch_size=config.contrastive_batch_size,
+                shuffle=config.shuffle,
+                num_workers=config.num_workers,
+                collate_fn=datamodule._loader_kwargs['collate_fn'] if 'collate_fn' in datamodule._loader_kwargs else None
+            )
+            # Note: ContrastiveDataset needs contrastive_collate_fn, not drug_target_collate_fn
+            # We need to import contrastive_collate_fn or use the one from DUDEDataModule logic
+            from ..dataset.datamodules import contrastive_collate_fn
+            contrastive_generator.collate_fn = contrastive_collate_fn
 
     config.drug_shape = drug_featurizer.shape
     config.target_shape = target_featurizer.shape
 
     # Model
     logg.info("Initializing model")
-    model = getattr(model_types, config.model_architecture)(
-        config.drug_shape,
-        config.target_shape,
-        latent_dimension=config.latent_dimension,
-        latent_distance=config.latent_distance,
-        latent_activation=config.latent_activation,
-        classify=config.classify,
-    )
+    model_kwargs = {
+        "drug_shape": config.drug_shape,
+        "target_shape": config.target_shape,
+        "latent_dimension": config.latent_dimension,
+        "latent_distance": config.latent_distance,
+        "latent_activation": config.latent_activation,
+        "classify": config.classify,
+    }
+
+    # Add architecture-specific args if they exist in config
+    if "num_layers" in config:
+        model_kwargs["num_layers"] = config.num_layers
+    if "num_heads" in config:
+        model_kwargs["num_heads"] = config.num_heads
+    if "dropout" in config:
+        model_kwargs["dropout"] = config.dropout
+    if "num_blocks" in config:
+        model_kwargs["num_blocks"] = config.num_blocks
+
+    model = getattr(model_types, config.model_architecture)(**model_kwargs)
     if "checkpoint" in config:
         state_dict = torch.load(config.checkpoint)
         model.load_state_dict(state_dict)
@@ -381,9 +445,14 @@ def main(args):
     # Optimizers
     logg.info("Initializing optimizers")
     opt = torch.optim.AdamW(model.parameters(), lr=config.lr)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
-        opt, T_0=config.lr_t0
-    )
+    if config.scheduler == "plateau":
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt, mode='max', factor=0.1, patience=config.patience // 2
+        )
+    else:
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+            opt, T_0=config.lr_t0
+        )
 
     if config.contrastive:
         config.dist_fn = "sigmoid_cosine_distance" if config.sigmoid_cosine else "cosine_distance"
@@ -446,6 +515,14 @@ def main(args):
 
     # Begin Training
     start_time = time()
+    history = {
+        "train_loss": [],
+        "val_aupr": [],
+        "val_auroc": [],
+        "epochs": [],
+        "test_results": {}
+    }
+    patience_counter = 0
     for epo in range(config.epochs):
         model.train()
         epoch_time_start = time()
@@ -471,19 +548,23 @@ def main(args):
             loss.backward()
             opt.step()
 
-        lr_scheduler.step()
+        if config.scheduler != "plateau":
+            lr_scheduler.step()
 
         wandb_log(
             {
                 "epoch": epo,
-                "train/lr": lr_scheduler.get_lr()[0],
+                "train/lr": opt.param_groups[0]['lr'],
             },
             do_wandb,
         )
         logg.info(
             f"Training at Epoch {epo + 1} with loss {loss.cpu().detach().numpy():8f}"
         )
-        logg.info(f"Updating learning rate to {lr_scheduler.get_lr()[0]:8f}")
+        history["train_loss"].append(float(loss.cpu().detach().numpy()))
+        history["epochs"].append(epo + 1)
+        
+        logg.info(f"Updating learning rate to {opt.param_groups[0]['lr']:8f}")
 
         # Contrastive Step
         if config.contrastive:
@@ -550,6 +631,12 @@ def main(args):
                 val_results["Charts/epoch_time"] = (
                     epoch_time_end - epoch_time_start
                 ) / config.every_n_val
+                
+                # Update history
+                if "val/aupr" in val_results:
+                    history["val_aupr"].append(float(val_results["val/aupr"]))
+                if "val/auroc" in val_results:
+                    history["val_auroc"].append(float(val_results["val/auroc"]))
 
                 wandb_log(val_results, do_wandb)
 
@@ -559,6 +646,7 @@ def main(args):
                     )
                     model_max = copy.deepcopy(model)
                     max_metric = val_results[config.watch_metric]
+                    patience_counter = 0
                     model_save_path = Path(
                         f"{save_dir}/{config.run_id}_best_model_epoch{epo:02}.pt"
                     )
@@ -572,11 +660,20 @@ def main(args):
                         art = wandb.Artifact(f"dti-{config.run_id}", type="model")
                         art.add_file(model_save_path, model_save_path.name)
                         wandb.log_artifact(art, aliases=["best"])
+                else:
+                    patience_counter += 1
 
                 logg.info(f"Validation at Epoch {epo + 1}")
                 for k, v in val_results.items():
                     if not k.startswith("_"):
                         logg.info(f"{k}: {v}")
+            
+            if config.scheduler == "plateau":
+                lr_scheduler.step(val_results[config.watch_metric])
+                
+            if patience_counter >= config.patience:
+                logg.info(f"Early stopping triggered at epoch {epo + 1}")
+                break
 
     end_time = time()
 
@@ -617,6 +714,19 @@ def main(args):
                 art = wandb.Artifact(f"dti-{config.run_id}", type="model")
                 art.add_file(model_save_path, model_save_path.name)
                 wandb.log_artifact(art, aliases=["best"])
+                
+        # Save history
+        def convert_to_float(v):
+            if isinstance(v, torch.Tensor):
+                return float(v.cpu().detach().numpy())
+            if isinstance(v, (int, float, np.number)):
+                return float(v)
+            return None
+
+        history["test_results"] = {k: convert_to_float(v) for k, v in test_results.items() if convert_to_float(v) is not None}
+        with open(f"{save_dir}/history.json", "w") as f:
+            json.dump(history, f, indent=4)
+        logg.info(f"Saved training history to {save_dir}/history.json")
 
     except Exception as e:
         logg.error(f"Testing failed with exception {e}")
