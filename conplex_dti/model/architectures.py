@@ -1208,3 +1208,99 @@ class CNN(nn.Module):
         # Uses the specified distance metric (e.g., Cosine Similarity)
         distance = self.activator(drug_projection, target_projection)
         return distance.squeeze()
+
+
+class LargeDuoLayerPerceptron(DuoLayerPerceptron):
+    def __init__(self, **kwargs):
+        # Override default hidden_dimension to 2048
+        kwargs['hidden_dimension'] = 2048
+        super().__init__(**kwargs)
+
+
+class SmallDuoLayerPerceptron(DuoLayerPerceptron):
+    def __init__(self, **kwargs):
+        # Override default hidden_dimension to 512
+        kwargs['hidden_dimension'] = 512
+        super().__init__(**kwargs)
+
+
+class TripleLayerPerceptron(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        hidden_dimension=1024,
+        latent_activation="ReLU",
+        latent_distance="Cosine",
+        classify=True,
+    ):
+        super().__init__()
+        self.drug_shape = drug_shape
+        self.target_shape = target_shape
+        self.latent_dimension = latent_dimension
+        self.hidden_dimension = hidden_dimension
+        self.do_classify = classify
+        
+        # Assuming ACTIVATIONS and DISTANCE_METRICS are defined globally in your context
+        # If not, ensure you have the dictionaries available (e.g., {"ReLU": nn.ReLU, ...})
+        self.latent_activation = ACTIVATIONS[latent_activation]
+
+        # *** MODIFIED DRUG PROJECTOR (2 Hidden Layers) ***
+        # Structure: Input -> Hidden1 -> Hidden2 -> Output
+        self.drug_projector = nn.Sequential(
+            nn.Linear(self.drug_shape, self.hidden_dimension),       # Layer 1
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, self.hidden_dimension), # Layer 2 (New)
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, latent_dimension),      # Layer 3
+            self.latent_activation()
+        )
+        
+        # Initialize weights for the three Linear layers (indices 0, 2, and 4)
+        nn.init.xavier_normal_(self.drug_projector[0].weight)
+        nn.init.xavier_normal_(self.drug_projector[2].weight)
+        nn.init.xavier_normal_(self.drug_projector[4].weight)
+
+        # *** MODIFIED TARGET PROJECTOR (2 Hidden Layers) ***
+        # Structure: Input -> Hidden1 -> Hidden2 -> Output
+        self.target_projector = nn.Sequential(
+            nn.Linear(self.target_shape, self.hidden_dimension),     # Layer 1
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, self.hidden_dimension), # Layer 2 (New)
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, latent_dimension),      # Layer 3
+            self.latent_activation()
+        )
+        
+        # Initialize weights for the three Linear layers (indices 0, 2, and 4)
+        nn.init.xavier_normal_(self.target_projector[0].weight)
+        nn.init.xavier_normal_(self.target_projector[2].weight)
+        nn.init.xavier_normal_(self.target_projector[4].weight)
+
+        if self.do_classify:
+            self.distance_metric = latent_distance
+            self.activator = DISTANCE_METRICS[self.distance_metric]()
+
+    def forward(self, drug, target):
+        if self.do_classify:
+            return self.classify(drug, target)
+        else:
+            return self.regress(drug, target)
+
+    def regress(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        inner_prod = torch.bmm(
+            drug_projection.view(-1, 1, self.latent_dimension),
+            target_projection.view(-1, self.latent_dimension, 1),
+        ).squeeze()
+        return inner_prod.squeeze()
+
+    def classify(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        distance = self.activator(drug_projection, target_projection)
+        return distance.squeeze()
