@@ -225,6 +225,9 @@
 2025-12-09 20:40:12,760 [INFO] Using CPU device cpu
 2025-12-09 20:40:12,761 [DEBUG] Setting random state 0
 2025-12-09 20:40:12,764 [INFO] Preparing DataModule
+2025-12-09 20:40:12,760 [INFO] Using CPU device cpu
+2025-12-09 20:40:12,761 [DEBUG] Setting random state 0
+2025-12-09 20:40:12,764 [INFO] Preparing DataModule
 2025-12-09 20:48:57,432 [INFO] Getting DataLoaders
 2025-12-09 20:48:57,432 [INFO] Initializing model
 2025-12-09 20:48:57,478 [INFO] SimpleCoembedding(
