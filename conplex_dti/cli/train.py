@@ -435,11 +435,14 @@ def main(args):
         model_kwargs["num_blocks"] = config.num_blocks
 
     model = getattr(model_types, config.model_architecture)(**model_kwargs)
+    logg.info("Model instantiated")
     if "checkpoint" in config:
         state_dict = torch.load(config.checkpoint)
         model.load_state_dict(state_dict)
 
+    logg.info("Moving model to device...")
     model = model.to(device)
+    logg.info("Model moved to device")
     logg.info(model)
 
     # Optimizers
