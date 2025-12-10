@@ -913,3 +913,301 @@ class CrossAttentionCoembedding(nn.Module):
 
     def classify(self, drug, target):
         return self.forward(drug, target)
+
+
+class DuoLayerPerceptron(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        # *** NEW PARAMETER FOR HIDDEN LAYER DIMENSION ***
+        hidden_dimension=1024,
+        latent_activation="ReLU",
+        latent_distance="Cosine",
+        classify=True,
+    ):
+        super().__init__()
+        self.drug_shape = drug_shape
+        self.target_shape = target_shape
+        self.latent_dimension = latent_dimension
+        self.hidden_dimension = hidden_dimension # Store new parameter
+        self.do_classify = classify
+        self.latent_activation = ACTIVATIONS[latent_activation]
+
+        # *** MODIFIED DRUG PROJECTOR ***
+        # Adds a new Linear layer and activation (hidden layer)
+        self.drug_projector = nn.Sequential(
+            nn.Linear(self.drug_shape, self.hidden_dimension),
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, latent_dimension),
+            self.latent_activation()
+        )
+        # Initialize weights for the two Linear layers
+        nn.init.xavier_normal_(self.drug_projector[0].weight)
+        nn.init.xavier_normal_(self.drug_projector[2].weight)
+
+        # *** MODIFIED TARGET PROJECTOR ***
+        # Adds a new Linear layer and activation (hidden layer)
+        self.target_projector = nn.Sequential(
+            nn.Linear(self.target_shape, self.hidden_dimension),
+            self.latent_activation(),
+            nn.Linear(self.hidden_dimension, latent_dimension),
+            self.latent_activation()
+        )
+        # Initialize weights for the two Linear layers
+        nn.init.xavier_normal_(self.target_projector[0].weight)
+        nn.init.xavier_normal_(self.target_projector[2].weight)
+
+        if self.do_classify:
+            self.distance_metric = latent_distance
+            self.activator = DISTANCE_METRICS[self.distance_metric]()
+
+    def forward(self, drug, target):
+        if self.do_classify:
+            return self.classify(drug, target)
+        else:
+            return self.regress(drug, target)
+
+    def regress(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        inner_prod = torch.bmm(
+            drug_projection.view(-1, 1, self.latent_dimension),
+            target_projection.view(-1, self.latent_dimension, 1),
+        ).squeeze()
+        return inner_prod.squeeze()
+
+    def classify(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        distance = self.activator(drug_projection, target_projection)
+        return distance.squeeze()
+
+
+class QuintupleLayerPerceptron(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        # *** NEW PARAMETERS FOR ALL FOUR HIDDEN LAYER DIMENSIONS ***
+        hidden_dim1=2048, # The original 'hidden_dimension'
+        hidden_dim2=1024, # New intermediate layer 2
+        hidden_dim3=512,  # New intermediate layer 3
+        hidden_dim4=256,  # New intermediate layer 4 (pre-latent)
+        latent_activation="ReLU",
+        latent_distance="Cosine",
+        classify=True,
+    ):
+        super().__init__()
+        self.drug_shape = drug_shape
+        self.target_shape = target_shape
+        self.latent_dimension = latent_dimension
+        
+        # Store all four hidden dimensions
+        self.hidden_dim1 = hidden_dim1
+        self.hidden_dim2 = hidden_dim2
+        self.hidden_dim3 = hidden_dim3
+        self.hidden_dim4 = hidden_dim4 
+
+        self.do_classify = classify
+        self.latent_activation = ACTIVATIONS[latent_activation]
+
+        # The structure is: Input -> H1 -> H2 -> H3 -> H4 -> Latent Output (5 total layers/4 hidden)
+
+        # *** MODIFIED DRUG PROJECTOR (5 Layers Total) ***
+        self.drug_projector = nn.Sequential(
+            # Layer 1: Input (drug_shape) -> Hidden 1
+            nn.Linear(self.drug_shape, self.hidden_dim1),
+            self.latent_activation(),
+            # Layer 2: Hidden 1 -> Hidden 2
+            nn.Linear(self.hidden_dim1, self.hidden_dim2),
+            self.latent_activation(),
+            # Layer 3: Hidden 2 -> Hidden 3
+            nn.Linear(self.hidden_dim2, self.hidden_dim3),
+            self.latent_activation(),
+            # Layer 4: Hidden 3 -> Hidden 4
+            nn.Linear(self.hidden_dim3, self.hidden_dim4),
+            self.latent_activation(),
+            # Layer 5: Hidden 4 -> Latent Output
+            nn.Linear(self.hidden_dim4, latent_dimension),
+            self.latent_activation()
+        )
+        
+        # Initialize weights for all five Linear layers (at indices 0, 2, 4, 6, 8)
+        for i in [0, 2, 4, 6, 8]:
+            nn.init.xavier_normal_(self.drug_projector[i].weight)
+
+
+        # *** MODIFIED TARGET PROJECTOR (5 Layers Total) ***
+        self.target_projector = nn.Sequential(
+            # Layer 1: Input (target_shape) -> Hidden 1
+            nn.Linear(self.target_shape, self.hidden_dim1),
+            self.latent_activation(),
+            # Layer 2: Hidden 1 -> Hidden 2
+            nn.Linear(self.hidden_dim1, self.hidden_dim2),
+            self.latent_activation(),
+            # Layer 3: Hidden 2 -> Hidden 3
+            nn.Linear(self.hidden_dim2, self.hidden_dim3),
+            self.latent_activation(),
+            # Layer 4: Hidden 3 -> Hidden 4
+            nn.Linear(self.hidden_dim3, self.hidden_dim4),
+            self.latent_activation(),
+            # Layer 5: Hidden 4 -> Latent Output
+            nn.Linear(self.hidden_dim4, latent_dimension),
+            self.latent_activation()
+        )
+        
+        # Initialize weights for all five Linear layers (at indices 0, 2, 4, 6, 8)
+        for i in [0, 2, 4, 6, 8]:
+            nn.init.xavier_normal_(self.target_projector[i].weight)
+
+
+        if self.do_classify:
+            self.distance_metric = latent_distance
+            self.activator = DISTANCE_METRICS[self.distance_metric]()
+
+    def forward(self, drug, target):
+        if self.do_classify:
+            return self.classify(drug, target)
+        else:
+            return self.regress(drug, target)
+
+    def regress(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        # Calculates dot product (Inner product for regression)
+        inner_prod = torch.bmm(
+            drug_projection.view(-1, 1, self.latent_dimension),
+            target_projection.view(-1, self.latent_dimension, 1),
+        ).squeeze()
+        return inner_prod.squeeze()
+
+    def classify(self, drug, target):
+        drug_projection = self.drug_projector(drug)
+        target_projection = self.target_projector(target)
+
+        # Uses the specified distance metric (e.g., Cosine Similarity)
+        distance = self.activator(drug_projection, target_projection)
+        return distance.squeeze()
+
+
+class CNNBlock(nn.Module):
+    """
+    A single 1D Convolutional Block: Conv1D -> Activation -> MaxPool1D
+    """
+    def __init__(self, in_channels, out_channels, kernel_size, activation_fn):
+        super().__init__()
+        self.conv = nn.Conv1d(in_channels, out_channels, kernel_size, padding=(kernel_size - 1) // 2)
+        self.activation = activation_fn()
+        # We can use MaxPool to downsample, or just let the convolutional layers do the work.
+        # Here, we use a simple MaxPool with stride 2 for effective downsampling.
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2) 
+        
+        # Initialize weights
+        nn.init.kaiming_normal_(self.conv.weight)
+        if self.conv.bias is not None:
+            nn.init.constant_(self.conv.bias, 0)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.activation(x)
+        x = self.pool(x)
+        return x
+
+class CNNDimensionalityReducer(nn.Module):
+    def __init__(
+        self,
+        # *** Input vector lengths. These must be reshapeable to [Batch, Channels, Length] ***
+        drug_input_length=2048, 
+        target_input_length=1024,
+        latent_dimension=1024,
+        activation_type="ReLU",
+        # --- CNN Hyperparameters ---
+        initial_channels=1, # Assuming 1 channel (raw features)
+        num_filters=64,
+        kernel_size=5,
+        num_conv_blocks=3
+    ):
+        super().__init__()
+        self.latent_dimension = latent_dimension
+        self.activation_fn = ACTIVATIONS[activation_type]
+        self.num_conv_blocks = num_conv_blocks
+        self.num_filters = num_filters
+        self.initial_channels = initial_channels
+        
+        # Store input lengths for reshaping
+        self.drug_input_length = drug_input_length
+        self.target_input_length = target_input_length
+
+        # --- Drug Feature Extractor ---
+        drug_conv_layers = []
+        in_c = initial_channels
+        for i in range(num_conv_blocks):
+            out_c = num_filters * (2 ** i) # Double the filters in each block
+            drug_conv_layers.append(CNNBlock(in_c, out_c, kernel_size, self.activation_fn))
+            in_c = out_c
+        self.drug_feature_extractor = nn.Sequential(*drug_conv_layers)
+        
+        # --- Target Feature Extractor ---
+        target_conv_layers = []
+        in_c = initial_channels
+        for i in range(num_conv_blocks):
+            out_c = num_filters * (2 ** i) 
+            target_conv_layers.append(CNNBlock(in_c, out_c, kernel_size, self.activation_fn))
+            in_c = out_c
+        self.target_feature_extractor = nn.Sequential(*target_conv_layers)
+
+        # Calculate the final flattened size after the convolutions and pooling
+        # This is non-trivial due to the dynamic pooling. We will calculate it in the forward pass
+        # OR use Adaptive Pooling to fix the output size before the final Linear layer.
+        
+        # --- Final Projection Layer (Fixed size from Adaptive Pooling) ---
+        
+        # We'll use Adaptive Max Pooling to ensure a fixed size output of 1 element 
+        # per channel, regardless of input length or previous pooling layers.
+        # Final channels will be num_filters * (2 ** (num_conv_blocks - 1))
+        final_channels = num_filters * (2 ** (num_conv_blocks - 1))
+        
+        # Linear layer to map the flattened features (final_channels * 1) to latent_dimension
+        self.drug_projector = nn.Linear(final_channels, latent_dimension)
+        self.target_projector = nn.Linear(final_channels, latent_dimension)
+        
+        nn.init.xavier_normal_(self.drug_projector.weight)
+        nn.init.xavier_normal_(self.target_projector.weight)
+
+    def _process_input(self, x, length):
+        """Helper to reshape input vector to [Batch, Channels, Length] for Conv1D"""
+        if x.dim() == 2:
+            # Reshape [Batch, Length] -> [Batch, Channels, Length]
+            return x.view(x.size(0), self.initial_channels, length)
+        return x
+
+    def forward(self, drug, target):
+        # 1. Reshape inputs for 1D CNN processing
+        drug = self._process_input(drug, self.drug_input_length)
+        target = self._process_input(target, self.target_input_length)
+
+        # 2. Extract features using the convolutional blocks
+        drug_features = self.drug_feature_extractor(drug)
+        target_features = self.target_feature_extractor(target)
+
+        # 3. Apply Global Max Pooling to get a fixed-size vector
+        # This takes the max value across the sequence length for each channel
+        # [Batch, Channels, Length_out] -> [Batch, Channels, 1]
+        drug_global_features = adaptive_max_pool1d(drug_features, 1)
+        target_global_features = adaptive_max_pool1d(target_features, 1)
+
+        # 4. Flatten the features: [Batch, Channels, 1] -> [Batch, Channels]
+        drug_flat = drug_global_features.squeeze(-1)
+        target_flat = target_global_features.squeeze(-1)
+
+        # 5. Project the global features to the final latent dimension
+        drug_projection = self.drug_projector(drug_flat)
+        target_projection = self.target_projector(target_flat)
+
+        return drug_projection, target_projection
