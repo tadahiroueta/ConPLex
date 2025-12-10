@@ -1096,132 +1096,115 @@ class QuintupleLayerPerceptron(nn.Module):
         return distance.squeeze()
 
 
-class CNNProjector(nn.Module):
+class CNN(nn.Module):
     def __init__(
         self,
-        # Now represents the LENGTH of the 1D input sequence
-        drug_shape=100,
-        target_shape=1000,
+        drug_shape=2048,
+        target_shape=1024,
         latent_dimension=1024,
-        latent_activation=nn.ReLU,
+        # *** CNN PARAMETERS ***
+        # We replace the specific hidden_dims with channel configurations
+        conv_channels=[32, 64, 128], # Number of filters for each conv layer
+        kernel_size=5,               # Size of the sliding window
+        dropout=0.1,
+        latent_activation="ReLU",
         latent_distance="Cosine",
         classify=True,
-        # New parameters for CNNs:
-        in_channels=1, # Assuming 1 channel for feature vectors/sequences
-        kernel_size=3,
-        num_filters=64,
     ):
         super().__init__()
         self.drug_shape = drug_shape
         self.target_shape = target_shape
         self.latent_dimension = latent_dimension
         self.do_classify = classify
-        self.in_channels = in_channels
-
-        # --- Drug Projector (CNN) ---
-        # Input shape: (Batch_Size, in_channels, drug_shape)
-        self.drug_cnn = nn.Sequential(
-            # Conv1d: (1, L) -> (64, L-2)
-            nn.Conv1d(in_channels, num_filters, kernel_size=kernel_size, padding=0),
-            nn.BatchNorm1d(num_filters),
-            latent_activation(),
-            # Conv1d: (64, L-2) -> (128, L-4)
-            nn.Conv1d(num_filters, num_filters * 2, kernel_size=kernel_size, padding=0),
-            nn.BatchNorm1d(num_filters * 2),
-            latent_activation(),
-            # MaxPool: Reduces length dimension
-            nn.MaxPool1d(kernel_size=2)
+        self.latent_activation_fn = ACTIVATIONS[latent_activation]
+        
+        # Build the projectors
+        self.drug_projector = self._build_cnn_projector(
+            input_length=self.drug_shape,
+            channels=conv_channels,
+            kernel_size=kernel_size,
+            dropout=dropout
         )
-        # Calculate the size of the features after the CNN layers
-        # This requires a dummy forward pass calculation
-        dummy_input = torch.zeros(1, in_channels, drug_shape)
-        cnn_output_size = self.drug_cnn(dummy_input).numel()
-
-        # Final linear layer to project CNN features to the latent space
-        self.drug_projector = nn.Sequential(
-            nn.Linear(cnn_output_size, latent_dimension),
-            latent_activation()
+        
+        self.target_projector = self._build_cnn_projector(
+            input_length=self.target_shape,
+            channels=conv_channels,
+            kernel_size=kernel_size,
+            dropout=dropout
         )
-        # Initialize the linear layer
-        xavier_normal_(self.drug_projector[0].weight)
 
-
-        # --- Target Projector (CNN) ---
-        # Assuming the same architecture but for a longer sequence
-        self.target_cnn = nn.Sequential(
-            # Conv1d: (1, L) -> (64, L-2)
-            nn.Conv1d(in_channels, num_filters, kernel_size=kernel_size, padding=0),
-            nn.BatchNorm1d(num_filters),
-            latent_activation(),
-            # Conv1d: (64, L-2) -> (128, L-4)
-            nn.Conv1d(num_filters * 2, num_filters * 2, kernel_size=kernel_size, padding=0),
-            nn.BatchNorm1d(num_filters * 2),
-            latent_activation(),
-            # MaxPool
-            nn.MaxPool1d(kernel_size=2)
-        )
-        # Recalculate size for target CNN (since target_shape is different)
-        dummy_input = torch.zeros(1, in_channels, target_shape)
-        cnn_output_size_target = self.target_cnn(dummy_input).numel()
-
-        # Final linear layer for target
-        self.target_projector = nn.Sequential(
-            nn.Linear(cnn_output_size_target, latent_dimension),
-            latent_activation()
-        )
-        # Initialize the linear layer
-        xavier_normal_(self.target_projector[0].weight)
-
-        # Classification setup remains the same
         if self.do_classify:
             self.distance_metric = latent_distance
-            # Initialize the distance metric module
             self.activator = DISTANCE_METRICS[self.distance_metric]()
 
-    # --- Forward Passes ---
+    def _build_cnn_projector(self, input_length, channels, kernel_size, dropout):
+        """
+        Helper method to build the CNN stack dynamically.
+        Structure: [Conv1d -> ReLU -> MaxPool] x N -> GlobalPool -> Flatten -> Linear
+        """
+        layers = []
+        in_channels = 1 # Input is a flat vector, so we treat it as 1 channel
+        
+        # 1. Convolutional Blocks
+        for out_channels in channels:
+            layers.append(nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, padding=kernel_size//2))
+            layers.append(nn.BatchNorm1d(out_channels))
+            layers.append(self.latent_activation_fn())
+            layers.append(nn.MaxPool1d(kernel_size=2, stride=2)) # Downsample by half
+            layers.append(nn.Dropout(dropout))
+            in_channels = out_channels
+            
+        # 2. Global Aggregation
+        # AdaptiveMaxPool ensures the output is fixed size regardless of input length 
+        # (Batch, Channels, Length) -> (Batch, Channels, 1)
+        layers.append(nn.AdaptiveMaxPool1d(1))
+        layers.append(nn.Flatten())
+        
+        # 3. Final Linear Projection to Latent Dimension
+        # Input dim is the number of channels in the last conv layer
+        layers.append(nn.Linear(channels[-1], self.latent_dimension))
+        layers.append(self.latent_activation_fn()) # Keep original final activation
+        
+        # Initialize weights
+        seq_model = nn.Sequential(*layers)
+        for m in seq_model.modules():
+            if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight)
+                
+        return seq_model
+
     def forward(self, drug, target):
         if self.do_classify:
             return self.classify(drug, target)
         else:
             return self.regress(drug, target)
 
+    def _process_input(self, data, projector):
+        # 1D CNN expects input shape: (Batch, Channels, Length)
+        # Current data shape: (Batch, Length)
+        # We unsqueeze to add the channel dim: (Batch, 1, Length)
+        if data.dim() == 2:
+            data = data.unsqueeze(1)
+            
+        return projector(data)
+
     def regress(self, drug, target):
-        # 1. Reshape for CNN: (Batch_Size, Length) -> (Batch_Size, Channels, Length)
-        drug = drug.unsqueeze(1) # Add channel dimension
-        target = target.unsqueeze(1) # Add channel dimension
+        # Pass through CNN projectors
+        drug_projection = self._process_input(drug, self.drug_projector)
+        target_projection = self._process_input(target, self.target_projector)
 
-        # 2. CNN and Flatten
-        drug_cnn_output = self.drug_cnn(drug).flatten(start_dim=1)
-        target_cnn_output = self.target_cnn(target).flatten(start_dim=1)
-
-        # 3. Project to Latent Space
-        drug_projection = self.drug_projector(drug_cnn_output)
-        target_projection = self.target_projector(target_cnn_output)
-
-        # 4. Regression Output
+        # Calculates dot product (Inner product for regression)
         inner_prod = torch.bmm(
             drug_projection.view(-1, 1, self.latent_dimension),
             target_projection.view(-1, self.latent_dimension, 1),
         ).squeeze()
-        relu_f = torch.nn.ReLU()
-        # Returns a vector of shape (Batch_Size,)
-        return relu_f(inner_prod).squeeze()
+        return inner_prod.squeeze()
 
     def classify(self, drug, target):
-        # 1. Reshape for CNN: (Batch_Size, Length) -> (Batch_Size, Channels, Length)
-        drug = drug.unsqueeze(1)
-        target = target.unsqueeze(1)
+        # Pass through CNN projectors
+        drug_projection = self._process_input(drug, self.drug_projector)
+        target_projection = self._process_input(target, self.target_projector)
 
-        # 2. CNN and Flatten
-        drug_cnn_output = self.drug_cnn(drug).flatten(start_dim=1)
-        target_cnn_output = self.target_cnn(target).flatten(start_dim=1)
-
-        # 3. Project to Latent Space
-        drug_projection = self.drug_projector(drug_cnn_output)
-        target_projection = self.target_projector(target_cnn_output)
-
-        # 4. Classification Output
+        # Uses the specified distance metric (e.g., Cosine Similarity)
         distance = self.activator(drug_projection, target_projection)
-        sigmoid_f = torch.nn.Sigmoid()
-        # Returns a vector of shape (Batch_Size,)
-        return sigmoid_f(distance).squeeze()
+        return distance.squeeze()
