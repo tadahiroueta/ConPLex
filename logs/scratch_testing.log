@@ -211,3 +211,14 @@
 2025-12-09 19:27:27,575 [INFO] Charts/wall_clock_time: 1895.6508450508118
 2025-12-09 19:27:27,615 [INFO] Saving final model to best_models\MLP\MLP_best_model.pt
 2025-12-09 19:27:27,616 [INFO] Saved training history to ./best_models/MLP/history.json
+2025-12-09 20:27:28,123 [INFO] Using CPU device cpu
+2025-12-09 20:27:28,123 [DEBUG] Setting random state 0
+2025-12-09 20:27:28,123 [INFO] Preparing DataModule
+2025-12-09 20:27:31,825 [INFO] Writing Morgan features to C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-09 20:27:31,920 [INFO] Writing ProtBert features to C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\ProtBert_features.h5
+2025-12-09 20:29:13,204 [INFO] Using CPU device cpu
+2025-12-09 20:29:13,204 [DEBUG] Setting random state 0
+2025-12-09 20:29:13,204 [INFO] Preparing DataModule
+2025-12-09 20:29:16,849 [WARNING] Drug and target featurizers already exist
+2025-12-09 20:29:16,949 [INFO] Preloading Morgan features from C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-09 20:29:16,970 [INFO] Preloading ProtBert features from C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\ProtBert_features.h5
