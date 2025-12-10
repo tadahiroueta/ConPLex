@@ -232,7 +232,8 @@ class ResidualCoembedding(nn.Module):
         target_projection = self.target_projector(target)
 
         distance = self.activator(drug_projection, target_projection)
-        return distance.squeeze()
+        sigmoid_f = torch.nn.Sigmoid() 
+        return sigmoid_f(distance).squeeze()
 
 
 class SimpleCoembeddingSigmoid(nn.Module):
