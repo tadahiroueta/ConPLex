@@ -225,3 +225,135 @@
 2025-12-09 20:40:12,760 [INFO] Using CPU device cpu
 2025-12-09 20:40:12,761 [DEBUG] Setting random state 0
 2025-12-09 20:40:12,764 [INFO] Preparing DataModule
+2025-12-09 21:06:41,861 [INFO] Using CPU device cpu
+2025-12-09 21:06:41,862 [DEBUG] Setting random state 0
+2025-12-09 21:06:41,877 [INFO] Preparing DataModule
+2025-12-09 21:09:13,969 [INFO] Writing Morgan features to C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-09 21:09:14,057 [INFO] Writing ProtBert features to C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\ProtBert_features.h5
+2025-12-09 21:39:16,718 [INFO] Preloading Morgan features from C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\Morgan_features.h5
+2025-12-09 21:39:16,738 [INFO] Preloading ProtBert features from C:\Users\Valued Customer\Documents\ConPLex\datasets\DAVIS\ProtBert_features.h5
+2025-12-09 21:39:16,815 [INFO] Getting DataLoaders
+2025-12-09 21:39:16,816 [INFO] Initializing model
+2025-12-09 21:39:16,925 [INFO] QuintupleLayerPerceptron(
+  (drug_projector): Sequential(
+    (0): Linear(in_features=2048, out_features=2048, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=2048, out_features=1024, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=1024, out_features=512, bias=True)
+    (5): ReLU()
+    (6): Linear(in_features=512, out_features=256, bias=True)
+    (7): ReLU()
+    (8): Linear(in_features=256, out_features=1024, bias=True)
+    (9): ReLU()
+  )
+  (target_projector): Sequential(
+    (0): Linear(in_features=1024, out_features=2048, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=2048, out_features=1024, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=1024, out_features=512, bias=True)
+    (5): ReLU()
+    (6): Linear(in_features=512, out_features=256, bias=True)
+    (7): ReLU()
+    (8): Linear(in_features=256, out_features=1024, bias=True)
+    (9): ReLU()
+  )
+  (activator): Cosine()
+)
+2025-12-09 21:39:16,927 [INFO] Initializing optimizers
+2025-12-09 21:39:16,928 [INFO] Initializing metrics
+2025-12-09 21:39:16,936 [INFO] Config:
+2025-12-09 21:39:16,938 [INFO] {
+    "wandb_proj": "NoSigmoidTest",
+    "wandb_save": false,
+    "log_file": "./logs/scratch_testing.log",
+    "model_save_dir": "./best_models",
+    "data_cache_dir": "./datasets",
+    "device": 0,
+    "replicate": 0,
+    "verbosity": 3,
+    "task": "davis",
+    "contrastive_split": "within",
+    "drug_featurizer": "MorganFeaturizer",
+    "target_featurizer": "ProtBertFeaturizer",
+    "model_architecture": "QuintupleLayerPerceptron",
+    "latent_dimension": 1024,
+    "latent_distance": "Cosine",
+    "epochs": 15,
+    "batch_size": 32,
+    "contrastive_batch_size": 256,
+    "shuffle": true,
+    "num_workers": 24,
+    "every_n_val": 1,
+    "lr": 0.0001,
+    "lr_t0": 10,
+    "contrastive": false,
+    "clr": 1e-05,
+    "clr_t0": 10,
+    "margin_fn": "tanh_decay",
+    "margin_max": 0.25,
+    "margin_t0": 10,
+    "cmd": "train",
+    "run_id": "quintuple",
+    "config": "config/default_config.yaml",
+    "sigmoid_cosine": false,
+    "scheduler": "cosine",
+    "patience": 10,
+    "classify": true,
+    "watch_metric": "val/aupr",
+    "latent_activation": "ReLU",
+    "drug_shape": 2048,
+    "target_shape": 1024
+}
+2025-12-09 21:39:16,942 [INFO] Beginning Training
+2025-12-09 21:40:57,083 [INFO] Training at Epoch 1 with loss 0.451529
+2025-12-09 21:40:57,084 [INFO] Updating learning rate to 0.000098
+2025-12-09 21:42:33,448 [DEBUG] Validation AUPR 0.285544 > previous max 0.000000
+2025-12-09 21:42:33,509 [INFO] Saving checkpoint model to best_models\quintuple\quintuple_best_model_epoch00.pt
+2025-12-09 21:42:33,509 [INFO] Validation at Epoch 1
+2025-12-09 21:42:33,510 [INFO] val/aupr: 0.2855440676212311
+2025-12-09 21:42:33,510 [INFO] val/auroc: 0.8373539447784424
+2025-12-09 21:42:33,511 [INFO] epoch: 0
+2025-12-09 21:42:33,511 [INFO] Charts/epoch_time: 100.14201498031616
+2025-12-09 21:44:13,011 [INFO] Training at Epoch 2 with loss 0.499217
+2025-12-09 21:44:13,012 [INFO] Updating learning rate to 0.000090
+2025-12-09 21:45:48,754 [DEBUG] Validation AUPR 0.352313 > previous max 0.285544
+2025-12-09 21:45:48,811 [INFO] Saving checkpoint model to best_models\quintuple\quintuple_best_model_epoch01.pt
+2025-12-09 21:45:48,811 [INFO] Validation at Epoch 2
+2025-12-09 21:45:48,812 [INFO] val/aupr: 0.3523128032684326
+2025-12-09 21:45:48,812 [INFO] val/auroc: 0.8572283387184143
+2025-12-09 21:45:48,812 [INFO] epoch: 1
+2025-12-09 21:45:48,813 [INFO] Charts/epoch_time: 99.49984860420227
+2025-12-09 21:47:27,958 [INFO] Training at Epoch 3 with loss 0.448865
+2025-12-09 21:47:27,959 [INFO] Updating learning rate to 0.000079
+2025-12-09 21:49:04,223 [INFO] Validation at Epoch 3
+2025-12-09 21:49:04,223 [INFO] val/aupr: 0.3461931347846985
+2025-12-09 21:49:04,224 [INFO] val/auroc: 0.866080641746521
+2025-12-09 21:49:04,225 [INFO] epoch: 2
+2025-12-09 21:49:04,225 [INFO] Charts/epoch_time: 99.1465744972229
+2025-12-09 21:50:43,285 [INFO] Training at Epoch 4 with loss 0.241326
+2025-12-09 21:50:43,286 [INFO] Updating learning rate to 0.000065
+2025-12-09 21:52:18,496 [DEBUG] Validation AUPR 0.356324 > previous max 0.352313
+2025-12-09 21:52:18,550 [INFO] Saving checkpoint model to best_models\quintuple\quintuple_best_model_epoch03.pt
+2025-12-09 21:52:18,550 [INFO] Validation at Epoch 4
+2025-12-09 21:52:18,551 [INFO] val/aupr: 0.3563236892223358
+2025-12-09 21:52:18,551 [INFO] val/auroc: 0.8679845929145813
+2025-12-09 21:52:18,551 [INFO] epoch: 3
+2025-12-09 21:52:18,552 [INFO] Charts/epoch_time: 99.059805393219
+2025-12-09 21:53:57,645 [INFO] Training at Epoch 5 with loss 0.617551
+2025-12-09 21:53:57,646 [INFO] Updating learning rate to 0.000050
+2025-12-09 21:55:32,976 [INFO] Validation at Epoch 5
+2025-12-09 21:55:32,976 [INFO] val/aupr: 0.34637510776519775
+2025-12-09 21:55:32,977 [INFO] val/auroc: 0.87876957654953
+2025-12-09 21:55:32,977 [INFO] epoch: 4
+2025-12-09 21:55:32,978 [INFO] Charts/epoch_time: 99.09430432319641
+2025-12-09 21:57:12,201 [INFO] Training at Epoch 6 with loss 0.579382
+2025-12-09 21:57:12,202 [INFO] Updating learning rate to 0.000035
+2025-12-09 21:58:50,346 [DEBUG] Validation AUPR 0.377099 > previous max 0.356324
+2025-12-09 21:58:50,401 [INFO] Saving checkpoint model to best_models\quintuple\quintuple_best_model_epoch05.pt
+2025-12-09 21:58:50,401 [INFO] Validation at Epoch 6
+2025-12-09 21:58:50,402 [INFO] val/aupr: 0.3770985007286072
+2025-12-09 21:58:50,402 [INFO] val/auroc: 0.8815651535987854
+2025-12-09 21:58:50,403 [INFO] epoch: 5
+2025-12-09 21:58:50,403 [INFO] Charts/epoch_time: 99.22480058670044
