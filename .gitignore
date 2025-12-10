@@ -4,8 +4,6 @@
 # Project Specific
 wandb/
 models/huggingface/
-# best_models/
-**.h5
 
 ### Git ###
 # Created by git for backups. To disable backups in Git:
