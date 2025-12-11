@@ -23,10 +23,6 @@ from ..dataset import (
     DUDEDataModule,
     EnzPredDataModule,
     TDCDataModule,
-    DTIDataModule,
-    DUDEDataModule,
-    EnzPredDataModule,
-    TDCDataModule,
     get_task_dir,
     ContrastiveDataset,
 )
@@ -415,31 +411,21 @@ def main(args):
 
     # Model
     logg.info("Initializing model")
-    model_kwargs = {
-        "drug_shape": config.drug_shape,
-        "target_shape": config.target_shape,
-        "latent_dimension": config.latent_dimension,
-        "latent_distance": config.latent_distance,
-        "latent_activation": config.latent_activation,
-        "classify": config.classify,
-    }
-
-    # Add architecture-specific args if they exist in config
-    if "num_layers" in config:
-        model_kwargs["num_layers"] = config.num_layers
-    if "num_heads" in config:
-        model_kwargs["num_heads"] = config.num_heads
-    if "dropout" in config:
-        model_kwargs["dropout"] = config.dropout
-    if "num_blocks" in config:
-        model_kwargs["num_blocks"] = config.num_blocks
-
-    model = getattr(model_types, config.model_architecture)(**model_kwargs)
+    model = getattr(model_types, config.model_architecture)(
+        config.drug_shape,
+        config.target_shape,
+        latent_dimension=config.latent_dimension,
+        latent_distance=config.latent_distance,
+        latent_activation=config.latent_activation,
+        classify=config.classify,
+    )
     if "checkpoint" in config:
         state_dict = torch.load(config.checkpoint)
         model.load_state_dict(state_dict)
 
+    logg.info("Moving model to device...")
     model = model.to(device)
+    logg.info("Model moved to device")
     logg.info(model)
 
     # Optimizers

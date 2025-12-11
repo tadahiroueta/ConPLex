@@ -12,7 +12,10 @@ import pytorch_lightning as pl
 import torch
 from numpy.random import choice
 from sklearn.model_selection import KFold, train_test_split
-from tdc.benchmark_group import dti_dg_group
+try:
+    from tdc.benchmark_group import dti_dg_group
+except ImportError:
+    dti_dg_group = None
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
 
