@@ -1,0 +1,253 @@
+*   [33m5755fac[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[31m|[m[32m\[m  
+[31m|[m * [33m0028579[m Got fair baseline model for biosnap
+[31m|[m *   [33m9bbdbb4[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[31m|[m [33m|[m[34m\[m  
+[31m|[m [33m|[m *   [33m9a61556[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[31m|[m [33m|[m [35m|[m[36m\[m  
+[31m|[m [33m|[m * [36m|[m [33mea74379[m Trained duo layer on biosnap, 50 epochs
+[31m|[m * [36m|[m [36m|[m [33m9c9955d[m Trained baseline on biosnap, 50 epochs
+* [36m|[m [36m|[m [36m|[m [33m9b5964d[m Got fair baseline davis model
+[36m|[m [36m|[m[36m_[m[36m|[m[36m/[m  
+[36m|[m[36m/[m[36m|[m [36m|[m   
+* [36m|[m [36m|[m [33mb5865f2[m Trained duo and baseline on davis, 50 epochs
+[36m|[m[36m/[m [36m/[m  
+* [36m|[m [33m8632306[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[1;31m|[m[36m\[m[36m|[m 
+[1;31m|[m *   [33m56b6398[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[1;31m|[m [1;33m|[m[1;34m\[m  
+[1;31m|[m [1;33m|[m * [33mf59c72c[m Trained triple layer model
+[1;31m|[m * [1;34m|[m [33me613672[m Trained large layer model
+[1;31m|[m [1;34m|[m[1;34m/[m  
+* [1;34m/[m [33md9e7b10[m Trained small layer model
+[1;34m|[m[1;34m/[m  
+*   [33mbf0f8ab[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[1;35m|[m[1;36m\[m  
+[1;35m|[m * [33md754605[m Trained CNN
+[1;35m|[m * [33m6dd0a3d[m Trained residual model
+* [1;36m|[m [33m98376f7[m Added alterations of duo layer model
+* [1;36m|[m [33md4022d9[m Trained cross attention model
+[1;36m|[m[1;36m/[m  
+* [33m4ad9454[m Trained quintuplet
+* [33mf24e03d[m Ignored skirmishes
+* [33mca39755[m Fixed? CNN
+* [33m6cb9b68[m Included h5 in gitiggnore
+* [33m449ad7d[m Added preprocessed features
+*   [33mda3b470[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[31m|[m[32m\[m  
+[31m|[m * [33mc435b8b[m Removed logs
+[31m|[m * [33mc161337[m Fixed CNN
+[31m|[m *   [33m5c9182b[m Merge branch 'main' of https://github.com/tadahiroueta/ConPLex
+[31m|[m [33m|[m[34m\[m  
+[31m|[m * [34m|[m [33m28559f4[m Merge between two lab computers
+[31m|[m * [34m|[m [33mbe96c4a[m Trained baseline
+* [34m|[m [34m|[m [33mfb6443e[m ....
+[34m|[m [34m|[m[34m/[m  
+[34m|[m[34m/[m[34m|[m   
+* [34m|[m [33m3b4e9f4[m Added two and five layer perceptrons and a CNN
+[34m|[m[34m/[m  
+* [33m29e5cd8[m Removed draft and unused config files
+* [33m5daa0bd[m Added first training to draft
+* [33m0243d4d[m Started demo and draft
+* [33mc4f50d5[m Trained a one-hidden-layer MLP quickly
+* [33m56b9425[m Organised added files
+* [33m832c426[m[33m ([m[1;32marshiya[m[33m)[m Add best model checkpoints (essential files only)
+* [33ma38bf66[m Implement Cross-Attention model and add analysis notebooks
+* [33m486a10b[m Share logs in repo
+* [33m6960d4d[m Added ControlRun models on 15 epochs
+* [33m07959bb[m[33m ([m[1;31morigin/arsh[m[33m)[m Added instructions
+* [33ma32a7e5[m Added downloadables
+* [33m20f03cd[m Added config for less epochs and no contrastive learning
+* [33mccd8c80[m Update build.yml with actions v4
+* [33m9b6248f[m Update build.yml
+* [33mafb26fa[m Add force_recompute flags for prediction to compute features on the fly instead of loading from disk
+*   [33md33cad9[m Merge pull request #39 from tvandera/fix/doclink
+[35m|[m[36m\[m  
+[35m|[m * [33m17a21a8[m fix: link to correct readthedocs from README
+[35m|[m[35m/[m  
+* [33m8f2dfc1[m Update README.md
+* [33m672abc9[m Fix certificate verify failed with new sslcontext
+* [33mde65dbe[m fix bug in predict (#34)
+* [33m37bff3f[m Fix bug from issue #33, store_true does not support argument type
+* [33meaefaf6[m bump version
+* [33m6fd67c7[m Update MarginScheduledLossFunction to not use sigmoid cosine distance
+*   [33mb21a398[m Merge branch 'main' of github.com:samsledje/ConPLex into main
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33m7c12449[m Update README.md
+* [1;32m|[m [33m4b1d3e5[m update predict with to instead of cuda
+[1;32m|[m[1;32m/[m  
+* [33maa03921[m update prediction to work with cpu only
+* [33m26b9728[m Update README.md
+* [33mdc8e037[m Update pyproject.toml
+* [33mbd46a31[m Update README.md
+* [33m8a6b226[m Update default_config.yaml
+* [33m670457f[m Update README.md
+*   [33md2bb8dd[m Merge pull request #23 from chrlatte/main
+[1;33m|[m[1;34m\[m  
+[1;33m|[m * [33mea3195e[m revisions to command line args
+[1;33m|[m * [33m35eb094[m revisions to predict
+[1;33m|[m * [33mc015bb9[m ran codestyle on predict
+[1;33m|[m * [33maefbe47[m implemented predict
+[1;33m|[m[1;33m/[m  
+* [33m1f5531f[m Update README.md
+* [33m6894b4a[m Update README.md
+*   [33m0e1aa07[m Merge pull request #20 from samsledje/update-readme-20230614
+[1;35m|[m[1;36m\[m  
+[1;35m|[m * [33mada93a9[m Update README.md
+[1;35m|[m[1;35m/[m  
+* [33m18866c4[m update codestyle
+*   [33m76c6656[m Merge pull request #19 from samsledje/dev
+[31m|[m[32m\[m  
+[31m|[m *   [33m36a279d[m Merge branch 'main' into dev
+[31m|[m [33m|[m[31m\[m  
+[31m|[m [33m|[m[31m/[m  
+[31m|[m[31m/[m[33m|[m   
+* [33m|[m   [33ma365dca[m Merge pull request #18 from samsledje/dev
+[35m|[m[36m\[m [33m\[m  
+[35m|[m [36m|[m *   [33mad14cfb[m Merge branch 'dev' of github.com:samsledje/ConPLex into dev
+[35m|[m [36m|[m [1;31m|[m[36m\[m  
+[35m|[m [36m|[m [1;31m|[m[36m/[m  
+[35m|[m [36m|[m[36m/[m[1;31m|[m   
+[35m|[m * [1;31m|[m   [33m2d36647[m Merge branch 'main' into dev
+[35m|[m [1;33m|[m[35m\[m [1;31m\[m  
+[35m|[m [1;33m|[m[35m/[m [1;31m/[m  
+[35m|[m[35m/[m[1;33m|[m [1;31m|[m   
+* [1;33m|[m [1;31m|[m [33m0e7283f[m Update README.md
+* [1;33m|[m [1;31m|[m [33m61ab7ad[m Update build.yml
+* [1;33m|[m [1;31m|[m [33m3e5ea3e[m Update Makefile
+* [1;33m|[m [1;31m|[m   [33mb43eca8[m Merge pull request #17 from samsledje/dev
+[1;35m|[m[1;36m\[m [1;33m\[m [1;31m\[m  
+[1;35m|[m [1;36m|[m [1;33m|[m * [33m20c8b3e[m Add download for DUDe and fix DUDe datamodule path missing
+[1;35m|[m [1;36m|[m [1;33m|[m[1;33m/[m  
+[1;35m|[m [1;36m|[m * [33m97e2369[m Update poetry install in makefile
+[1;35m|[m [1;36m|[m * [33me94a57c[m Add data downloading command
+[1;35m|[m [1;36m|[m[1;36m/[m  
+[1;35m|[m *   [33ma1b5649[m Merge branch 'main' into dev
+[1;35m|[m [31m|[m[1;35m\[m  
+[1;35m|[m [31m|[m[1;35m/[m  
+[1;35m|[m[1;35m/[m[31m|[m   
+* [31m|[m   [33mb7f7387[m Merge pull request #15 from samsledje/samsledje-patch-1
+[33m|[m[34m\[m [31m\[m  
+[33m|[m * [31m|[m [33m17a442a[m Update README.md
+[33m|[m[33m/[m [31m/[m  
+* [31m|[m [33mdf42f1f[m update training to fix bug
+* [31m|[m   [33m0465555[m Merge pull request #14 from samsledje/dev
+[35m|[m[36m\[m [31m\[m  
+* [36m|[m [31m|[m [33m93424af[m Delete greetings.yml
+[36m|[m [36m|[m * [33m70883cc[m Update versioning and cli parser info
+[36m|[m [36m|[m[36m/[m  
+[36m|[m * [33m56c99f7[m update release drafter
+[36m|[m *   [33m611ff9f[m Merge branch 'main' of github.com:samsledje/ConPLex into dev
+[36m|[m [1;31m|[m[36m\[m  
+[36m|[m [1;31m|[m[36m/[m  
+[36m|[m[36m/[m[1;31m|[m   
+* [1;31m|[m [33m691a583[m Update build.yml
+[1;32m|[m *   [33m59dab95[m Merge branch 'dev' of github.com:samsledje/ConPLex into dev
+[1;32m|[m [1;33m|[m[1;34m\[m  
+[1;32m|[m [1;33m|[m * [33m9e3fe0f[m Update README.md
+[1;32m|[m * [1;34m|[m [33mf83352b[m add utils to api documentation
+[1;32m|[m [1;34m|[m[1;34m/[m  
+[1;32m|[m * [33m9afc240[m update readme and tests
+[1;32m|[m * [33m8c14d2b[m Update README.md
+[1;32m|[m * [33ma677bfe[m fixing tests
+[1;32m|[m * [33m4c0d5fe[m Update build.yml
+[1;32m|[m * [33mcaf2da0[m update docs and hopefully fix isort issue
+[1;32m|[m * [33m951522f[m revert
+[1;32m|[m * [33me211c8a[m workflow only runs on main branch
+[1;32m|[m * [33m26a2ea0[m workflow only runs on main branch
+[1;32m|[m * [33m0185096[m update config and docs
+[1;32m|[m * [33m11510a8[m update cli with arguments and download script
+[1;32m|[m * [33mc126156[m annotate default config with parameter explanations
+[1;32m|[m * [33md04de91[m add download script and fix dependencies
+[1;32m|[m * [33m45e4199[m update documentation
+[1;32m|[m * [33made46ee[m add autodoc
+[1;32m|[m * [33m5c6bda0[m apparently invalid python version?
+[1;32m|[m * [33m0cdedef[m adding cli training and documentation skeleton
+[1;32m|[m[1;32m/[m  
+* [33ma173840[m Update .gitignore
+* [33mf269a39[m Delete dependabot.yml
+* [33me029f85[m Remove safety check from build (py issue)
+* [33m7bc1204[m Fixing requirements
+* [33maa2ee98[m Update pyproject.toml
+*   [33m7517b6b[m Merge pull request #13 from samsledje/dependabot/pip/safety-2.3.4
+[1;35m|[m[1;36m\[m  
+[1;35m|[m *   [33m9bbfcb9[m Merge branch 'main' into dependabot/pip/safety-2.3.4
+[1;35m|[m [31m|[m[1;35m\[m  
+[1;35m|[m [31m|[m[1;35m/[m  
+[1;35m|[m[1;35m/[m[31m|[m   
+* [31m|[m   [33md2fab9a[m Merge pull request #12 from samsledje/dependabot/pip/coverage-7.2.1
+[33m|[m[34m\[m [31m\[m  
+[33m|[m * [31m\[m   [33mc0e6578[m Merge branch 'main' into dependabot/pip/coverage-7.2.1
+[33m|[m [35m|[m[33m\[m [31m\[m  
+[33m|[m [35m|[m[33m/[m [31m/[m  
+[33m|[m[33m/[m[35m|[m [31m|[m   
+* [35m|[m [31m|[m   [33me202a75[m Merge pull request #11 from samsledje/dependabot/pip/safety-2.3.5
+[1;31m|[m[1;32m\[m [35m\[m [31m\[m  
+[1;31m|[m * [35m\[m [31m\[m   [33mc5631a3[m Merge branch 'main' into dependabot/pip/safety-2.3.5
+[1;31m|[m [1;33m|[m[1;31m\[m [35m\[m [31m\[m  
+[1;31m|[m [1;33m|[m[1;31m/[m [35m/[m [31m/[m  
+[1;31m|[m[1;31m/[m[1;33m|[m [35m|[m [31m|[m   
+[1;31m|[m * [35m|[m [31m|[m [33m19ff639[m :arrow_up: Bump safety from 1.10.3 to 2.3.5
+[1;31m|[m [1;34m|[m * [31m|[m [33m9de2afa[m :arrow_up: Bump coverage from 6.5.0 to 7.2.1
+[1;31m|[m [1;34m|[m[1;31m/[m [31m/[m  
+[1;31m|[m[1;31m/[m[1;34m|[m [31m|[m   
+[1;31m|[m [1;34m|[m * [33m17cf8e3[m :arrow_up: Bump safety from 1.10.3 to 2.3.4
+[1;31m|[m [1;34m|[m[1;31m/[m  
+[1;31m|[m[1;31m/[m[1;34m|[m   
+* [1;34m|[m   [33me3f8a5b[m Merge pull request #10 from samsledje/dependabot/pip/black-23.1.0
+[1;35m|[m[1;36m\[m [1;34m\[m  
+[1;35m|[m * [1;34m\[m   [33md6acdb4[m Merge branch 'main' into dependabot/pip/black-23.1.0
+[1;35m|[m [31m|[m[1;35m\[m [1;34m\[m  
+[1;35m|[m [31m|[m[1;35m/[m [1;34m/[m  
+[1;35m|[m[1;35m/[m[31m|[m [1;34m|[m   
+* [31m|[m [1;34m|[m   [33maf9c5f8[m Merge pull request #9 from samsledje/dependabot/pip/rich-13.3.2
+[33m|[m[34m\[m [31m\[m [1;34m\[m  
+[33m|[m * [31m|[m [1;34m|[m [33m804f3f3[m :arrow_up: Bump rich from 10.16.2 to 13.3.2
+[33m|[m[33m/[m [31m/[m [1;34m/[m  
+* [31m|[m [1;34m|[m [33mc7fd49a[m Update README.md
+[34m|[m * [1;34m|[m [33m66cc374[m :arrow_up: Bump black from 21.12b0 to 23.1.0
+[34m|[m[34m/[m [1;34m/[m  
+* [1;34m|[m   [33mb65b411[m Merge pull request #8 from samsledje/dependabot/pip/pyupgrade-3.3.1
+[35m|[m[36m\[m [1;34m\[m  
+[35m|[m * [1;34m\[m   [33mb33d43d[m Merge branch 'main' into dependabot/pip/pyupgrade-3.3.1
+[35m|[m [1;31m|[m[35m\[m [1;34m\[m  
+[35m|[m [1;31m|[m[35m/[m [1;34m/[m  
+[35m|[m[35m/[m[1;31m|[m [1;34m|[m   
+* [1;31m|[m [1;34m|[m   [33m42f0f1c[m Merge pull request #7 from samsledje/dependabot/pip/pytest-7.2.2
+[1;33m|[m[1;34m\[m [1;31m\[m [1;34m\[m  
+[1;33m|[m * [1;31m\[m [1;34m\[m   [33m4577e4f[m Merge branch 'main' into dependabot/pip/pytest-7.2.2
+[1;33m|[m [1;35m|[m[1;33m\[m [1;31m\[m [1;34m\[m  
+[1;33m|[m [1;35m|[m[1;33m/[m [1;31m/[m [1;34m/[m  
+[1;33m|[m[1;33m/[m[1;35m|[m [1;31m|[m [1;34m|[m   
+* [1;35m|[m [1;31m|[m [1;34m|[m   [33meaf860e[m Merge pull request #6 from samsledje/dependabot/pip/pre-commit-3.1.1
+[31m|[m[32m\[m [1;35m\[m [1;31m\[m [1;34m\[m  
+[31m|[m * [1;35m|[m [1;31m|[m [1;34m|[m [33mddc2198[m :arrow_up: Bump pre-commit from 2.21.0 to 3.1.1
+[31m|[m [1;34m|[m [1;35m|[m[1;34m_[m[1;31m|[m[1;34m/[m  
+[31m|[m [1;34m|[m[1;34m/[m[1;35m|[m [1;31m|[m   
+* [1;34m|[m [1;35m|[m [1;31m|[m   [33mfb88ab7[m Merge pull request #5 from samsledje/dependabot/docker/docker/python-3.11-slim-buster
+[33m|[m[34m\[m [1;34m\[m [1;35m\[m [1;31m\[m  
+[33m|[m * [1;34m|[m [1;35m|[m [1;31m|[m [33mbd3525b[m :arrow_up: Bump python in /docker
+[33m|[m [1;34m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+* [1;34m|[m [1;35m|[m [1;31m|[m   [33m78a1d08[m Merge pull request #4 from samsledje/dependabot/github_actions/actions/checkout-3
+[35m|[m[36m\[m [1;34m\[m [1;35m\[m [1;31m\[m  
+[35m|[m * [1;34m|[m [1;35m|[m [1;31m|[m [33m5eb4e75[m :arrow_up: Bump actions/checkout from 2 to 3
+[35m|[m [1;34m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+* [1;34m|[m [1;35m|[m [1;31m|[m   [33m3212ee1[m Merge pull request #3 from samsledje/dependabot/github_actions/actions/cache-3.3.0
+[1;31m|[m[1;32m\[m [1;34m\[m [1;35m\[m [1;31m\[m  
+[1;31m|[m * [1;34m|[m [1;35m|[m [1;31m|[m [33m49aae03[m :arrow_up: Bump actions/cache from 2.1.6 to 3.3.0
+[1;31m|[m [1;34m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+* [1;34m|[m [1;35m|[m [1;31m|[m   [33m8e7d70f[m Merge pull request #2 from samsledje/dependabot/github_actions/release-drafter/release-drafter-5.23.0
+[1;33m|[m[1;34m\[m [1;34m\[m [1;35m\[m [1;31m\[m  
+[1;33m|[m * [1;34m|[m [1;35m|[m [1;31m|[m [33md345f94[m :arrow_up: Bump release-drafter/release-drafter from 5.15.0 to 5.23.0
+[1;33m|[m [1;34m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+* [1;34m|[m [1;35m|[m [1;31m|[m   [33m24706db[m Merge pull request #1 from samsledje/dependabot/github_actions/actions/setup-python-4.5.0
+[1;34m|[m[1;36m\[m [1;34m\[m [1;35m\[m [1;31m\[m  
+[1;34m|[m [1;36m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+[1;34m|[m[1;34m/[m[1;36m|[m [1;35m|[m [1;31m|[m   
+[1;34m|[m * [1;35m|[m [1;31m|[m [33m4a07c8a[m :arrow_up: Bump actions/setup-python from 2.2.2 to 4.5.0
+[1;34m|[m[1;34m/[m [1;35m/[m [1;31m/[m  
+[1;34m|[m * [1;31m/[m [33m8877b27[m :arrow_up: Bump pytest from 6.2.5 to 7.2.2
+[1;34m|[m[1;34m/[m [1;31m/[m  
+[1;34m|[m * [33m230f008[m :arrow_up: Bump pyupgrade from 2.38.4 to 3.3.1
+[1;34m|[m[1;34m/[m  
+* [33m0b6b287[m Initial commit

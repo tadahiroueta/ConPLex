@@ -740,3 +740,57 @@ class AffinityConcatLinear(nn.Module):
     def forward(self, mol_emb, prot_emb):
         cat_emb = torch.cat([mol_emb, prot_emb], axis=1)
         return self.fc(cat_emb).squeeze()
+
+
+class ModernBaseline(nn.Module):
+    def __init__(
+        self,
+        drug_shape=2048,
+        target_shape=1024,
+        latent_dimension=1024,
+        dropout=0.1,
+        classify=True,
+    ):
+        super().__init__()
+        self.do_classify = classify
+        
+        # 1. Use GELU instead of ReLU
+        # 2. Add LayerNorm before the activation
+        self.drug_projector = nn.Sequential(
+            nn.Linear(drug_shape, latent_dimension),
+            nn.LayerNorm(latent_dimension), 
+            nn.GELU(),
+            nn.Dropout(dropout)
+        )
+
+        self.target_projector = nn.Sequential(
+            nn.Linear(target_shape, latent_dimension),
+            nn.LayerNorm(latent_dimension),
+            nn.GELU(),
+            nn.Dropout(dropout)
+        )
+        
+        # 3. Learnable Temperature for Cosine Similarity
+        # Initialized to log(1/0.07) which is standard for contrastive learning
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
+
+    def forward(self, drug, target):
+        drug_emb = self.drug_projector(drug)
+        target_emb = self.target_projector(target)
+        
+        # Normalize embeddings for Cosine Similarity
+        drug_emb = torch.nn.functional.normalize(drug_emb, dim=-1)
+        target_emb = torch.nn.functional.normalize(target_emb, dim=-1)
+        
+        # Calculate Cosine Similarity
+        # (Batch, Dim) * (Batch, Dim) -> (Batch)
+        cosine_sim = torch.sum(drug_emb * target_emb, dim=1)
+        
+        # Apply Temperature scaling
+        logit_scale = self.logit_scale.exp()
+        scaled_sim = cosine_sim * logit_scale
+        
+        if self.do_classify:
+            return torch.sigmoid(scaled_sim)
+        else:
+            return scaled_sim
